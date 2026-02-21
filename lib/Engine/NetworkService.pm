@@ -1,11 +1,17 @@
 package Engine::NetworkService;
+use FindBin;
+use lib "$FindBin::Bin/local/lib/perl5";
 use IO::Socket::INET;
 use IO::Select;
+use NetAddr::IP;
 use strict;
 use warnings;
 use feature 'signatures';
+use feature 'try';
+use feature 'try';
+no warnings 'experimental::try';
 use Exporter 'import';
-our @EXPORT  = qw(check_single_port);
+our @EXPORT  = qw(check_open_ports);
 
 sub check_single_port ($target, $port) {
     my $socket = IO::Socket::INET->new(
@@ -51,13 +57,24 @@ sub get_request_string ($target) {
 }
 
 sub check_ip_for_open_ports ($ip, $port_range) {
-    #todo
-}
+    my ($min, $max) = split(/:/, $port_range);
+    print "Checking $ip, $port_range";
+    for my $port ($min...$max // $min) {
+        try {
+            check_single_port($ip, $port)
+        }
+        catch ($e) {
+            warn "Caught an error: $e";
+        }
+    }
 
-sub split_cidr_range_to_individual_ips($cidr_range) {
-    #todo
 }
 
 sub check_open_ports ($cidr_range, $port_range) {
-    #todo
+    my $ips_to_check = NetAddr::IP->new($cidr_range)->hostenumref;
+
+    foreach my $ip (@$ips_to_check) {
+        print "Checking: $ip";
+        check_ip_for_open_ports($ip->addr, $port_range)
+    }
 }

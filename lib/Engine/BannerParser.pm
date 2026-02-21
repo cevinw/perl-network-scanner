@@ -5,7 +5,7 @@ use warnings;
 
 use feature 'signatures';
 use Exporter 'import';
-our @EXPORT  = qw(check_single_port);
+our @EXPORT  = qw(parse_banner);
 
 sub parse_banner($banner){
 
